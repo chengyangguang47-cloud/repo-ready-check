@@ -1,101 +1,142 @@
 # Repo Ready Check
 
-一个零依赖的 Python 命令行工具，用来检查 GitHub 仓库是否具备公开发布、协作和持续交付的基础条件。
+> A zero-dependency Python CLI that scores whether a repository is ready to publish, collaborate on, and maintain.
 
-> 这是一个作品集项目：它展示了如何把重复的仓库检查工作做成可复用的 CLI、测试套件和 GitHub Actions 流程。
+面向个人开发者和小团队的仓库体检工具：运行一次检查，得到 0–100 分、具体缺口和可直接修复的下一步。
 
-## 它解决什么问题
+[![CI](https://github.com/chengyangguang47-cloud/repo-ready-check/actions/workflows/ci.yml/badge.svg)](https://github.com/chengyangguang47-cloud/repo-ready-check/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/chengyangguang47-cloud/repo-ready-check)](https://github.com/chengyangguang47-cloud/repo-ready-check/releases)
+[![License](https://img.shields.io/github/license/chengyangguang47-cloud/repo-ready-check)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB.svg)](https://www.python.org/)
 
-许多小型软件团队的仓库可以运行，却缺少 README、许可证、测试、CI、Issue 模板或安全说明。Repo Ready Check 会给仓库打分，并列出下一步应该补齐的内容。
+Repo Ready Check scans the files and automation people expect before they contribute to or ship a project. It never uploads source code, has no runtime dependencies, and works locally or in GitHub Actions.
 
-## 快速开始
+## Why it exists
 
-在目标仓库根目录运行：
+A project can run correctly and still be difficult to trust. Missing documentation, tests, licensing, security guidance, or CI creates friction for contributors and future customers. This tool turns those gaps into a small, repeatable quality gate.
 
-~~~~text
+## Features
+
+- Scores ten repository essentials on a 100-point scale.
+- Prints actionable fixes instead of only reporting failures.
+- Supports strict mode for CI quality gates.
+- Supports JSON output for scripts and dashboards.
+- Uses only the Python standard library at runtime.
+- Includes unit tests, issue forms, pull request guidance, and automated releases.
+
+## Install
+
+### Install the latest published wheel
+
+```powershell
+python -m pip install "https://github.com/chengyangguang47-cloud/repo-ready-check/releases/download/v0.1.0/repo_ready_check-0.1.0-py3-none-any.whl"
+```
+
+### Install from source
+
+```powershell
+git clone https://github.com/chengyangguang47-cloud/repo-ready-check.git
+cd repo-ready-check
 python -m pip install -e .
+```
+
+## Usage
+
+Run the audit from the root of the repository you want to inspect:
+
+```powershell
 repo-ready-check .
-~~~~
+```
 
-也可以直接运行：
+Use strict mode when a score below 80 should fail the command:
 
-~~~~text
-python -m repo_ready_check .
-~~~~
-
-严格模式适合放进 CI：
-
-~~~~text
+```powershell
 repo-ready-check . --strict
-~~~~
+```
 
-机器可读输出：
+Generate machine-readable output:
 
-~~~~text
+```powershell
 repo-ready-check . --json
-~~~~
+```
 
-## 示例输出
+You can also run it without installing the console script:
 
-~~~~text
+```powershell
+python -m repo_ready_check .
+```
+
+## Example output
+
+```text
 Repo Ready Check
 Path: C:\projects\demo
 Score: 85/100
 
 [PASS] README.md                 15/15
 [PASS] License                  10/10
-[PASS] .gitignore               10/10
-[PASS] Project manifest         10/10
 [PASS] Tests                    15/15
 [PASS] CI workflow              15/15
-[PASS] Issue template           10/10
 [FAIL] Pull request template     0/5
-[FAIL] Security policy           0/5
-[PASS] Changelog                 5/5
 
 Next actions:
 - Add .github/pull_request_template.md
-- Add SECURITY.md
-~~~~
+```
 
-## 检查项目
+## Checks
 
-| 检查项 | 分值 |
+| Check | Weight |
 | --- | ---: |
 | README.md | 15 |
 | LICENSE | 10 |
 | .gitignore | 10 |
-| 项目清单文件 | 10 |
-| 测试目录 | 15 |
-| GitHub Actions 工作流 | 15 |
-| Issue 模板 | 10 |
-| Pull Request 模板 | 5 |
+| Project manifest | 10 |
+| Tests | 15 |
+| GitHub Actions workflow | 15 |
+| Issue template | 10 |
+| Pull request template | 5 |
 | SECURITY.md | 5 |
 | CHANGELOG.md | 5 |
 
-总分为 100 分。--strict 模式要求至少 80 分。
+The total is 100 points. Strict mode passes at 80 points or above.
 
-## 开发
+## CI and releases
 
-本项目只使用 Python 标准库：
+Every push and pull request runs the test suite and a strict repository audit in [GitHub Actions](.github/workflows/ci.yml). Pushing a `v*` tag builds a wheel and source archive, then creates a GitHub Release through [the release workflow](.github/workflows/release.yml).
 
-~~~~text
+- [Latest release](https://github.com/chengyangguang47-cloud/repo-ready-check/releases/latest)
+- [CI runs](https://github.com/chengyangguang47-cloud/repo-ready-check/actions)
+- [Changelog](CHANGELOG.md)
+
+## Development
+
+This project targets Python 3.10+ and keeps runtime dependencies at zero.
+
+```powershell
+$env:PYTHONPATH = "src"
 python -m unittest discover -s tests -v
 python -m repo_ready_check . --strict
-~~~~
+```
 
-## 作品集中的服务场景
+## Portfolio use cases
 
-这个工具可以作为仓库自动化服务的免费入口。客户可以先运行检查器，再购买仓库整理、CI 配置、自动发布、跨平台打包或长期维护服务。
+Repo Ready Check is also a small example of a service that can be delivered to a client:
 
-## 路线图
+- repository health and release-readiness audits;
+- README, issue template, and contribution-flow setup;
+- GitHub Actions CI and automated release configuration;
+- lightweight Python automation for recurring maintenance work.
 
-- [ ] 支持 Markdown 内容质量检查
-- [ ] 支持检查 GitHub Actions 权限
-- [ ] 支持导出 HTML 报告
-- [ ] 支持生成修复补丁
-- [ ] 发布 GitHub Action 版本
+The goal is to make a repository easier to trust, easier to contribute to, and easier to maintain.
 
-## 许可证
+## Roadmap
 
-MIT
+- [ ] Markdown content quality checks
+- [ ] GitHub Actions permission checks
+- [ ] HTML report export
+- [ ] Generated repair patches
+- [ ] Standalone GitHub Action distribution
+
+## License
+
+MIT. See [LICENSE](LICENSE).
